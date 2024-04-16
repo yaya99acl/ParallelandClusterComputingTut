@@ -22,8 +22,10 @@ int main(int argc, char** argv) {
            world_rank - 1);
 
     // Notify teammate
-    MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-    printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    if(teammate_rank >= 0 && teammate_rank < world_size){
+      MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
+      printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    }
 
     // Send the token to the next process
     MPI_Send(&token, 1, MPI_INT, (world_rank + 1) % world_size, 0,
@@ -50,8 +52,10 @@ int main(int argc, char** argv) {
            world_size - 1);
 
     // Notify teammate
-    MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-    printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    if(teammate_rank >= 0 && teammate_rank < world_size){
+      MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
+      printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    }
   }
 
   MPI_Finalize();
