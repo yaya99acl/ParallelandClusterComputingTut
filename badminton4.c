@@ -36,6 +36,6 @@ int main(int argc, char** argv) {
       printf("Process %d notified Process %d\n", world_rank, teammate_rank);
     }
   }
-
+//
   MPI_Finalize();
 }
