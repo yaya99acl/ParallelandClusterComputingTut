@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
   int token;
+  int teammate_rank = (world_rank % 2 == 0) ? world_rank + 2 : world_rank - 2;
+
   // Receive from the lower process and send to the higher process. Take care
   // of the special case when you are the first process to prevent deadlock.
   if (world_rank != 0) {
@@ -20,7 +22,6 @@ int main(int argc, char** argv) {
            world_rank - 1);
 
     // Notify teammate
-    int teammate_rank = (world_rank % 2 == 0) ? world_rank + 1 : world_rank - 1;
     MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
     printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
 
@@ -49,7 +50,6 @@ int main(int argc, char** argv) {
            world_size - 1);
 
     // Notify teammate
-    int teammate_rank = (world_rank % 2 == 0) ? world_rank + 1 : world_rank - 1;
     MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
     printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
   }
