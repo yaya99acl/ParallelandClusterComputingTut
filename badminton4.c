@@ -24,22 +24,33 @@ int main(int argc, char** argv) {
 
   while (ping_pong_count < PING_PONG_LIMIT) {
     if (world_rank == ping_pong_count % 4) {
-      // Increment the ping pong count before you send it
-      ping_pong_count++;
-      MPI_Send(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD);
-      printf("Player %d sent and incremented ping_pong_count %d to Player %d\n",
-             world_rank, ping_pong_count, partner_rank);
-      MPI_Send(&ping_pong_count, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-      printf("Player %d notified Player %d\n", world_rank, teammate_rank);
+        // Increment the ping pong count before you send it
+        ping_pong_count++;
+        MPI_Send(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD);
+        printf("Player %d sent and incremented ping_pong_count %d to Player %d\n",
+            world_rank, ping_pong_count, partner_rank);
+        int teammate_count;
+        MPI_Recv(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE);
+        MPI_Recv(&teammate_count, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE);
+        ping_pong_count = teammate_count; // Update ping_pong_count with teammate's count
+        MPI_Send(&ping_pong_count, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
+        printf("Player %d notified Player %d\n", world_rank, teammate_rank);
     } else {
-      MPI_Recv(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD,
-               MPI_STATUS_IGNORE);
-      printf("Player %d received ping_pong_count %d from Player %d\n",
-             world_rank, ping_pong_count, partner_rank);
-      MPI_Recv(&ping_pong_count, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD,
-               MPI_STATUS_IGNORE);
-      printf("Player %d notified by Player %d\n", world_rank, teammate_rank);
+        MPI_Recv(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE);
+        printf("Player %d received ping_pong_count %d from Player %d\n",
+            world_rank, ping_pong_count, partner_rank);
+        int teammate_count;
+        MPI_Recv(&teammate_count, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD,
+                MPI_STATUS_IGNORE);
+        ping_pong_count = teammate_count; // Update ping_pong_count with teammate's count
+        MPI_Send(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD);
+        printf("Player %d notified by Player %d\n", world_rank, teammate_rank);
     }
+}
+
   }
 
   MPI_Finalize();
