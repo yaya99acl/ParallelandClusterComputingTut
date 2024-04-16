@@ -32,10 +32,6 @@ int main(int argc, char** argv) {
              MPI_COMM_WORLD);
     printf("Process %d sent token %d to process %d\n", world_rank, token,
            (world_rank + 1) % world_size);
-
-    // Notify teammate
-    MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-    printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
   } else {
     // Set the token's value if you are process 0
     token = -1;
@@ -47,8 +43,10 @@ int main(int argc, char** argv) {
            (world_rank + 1) % world_size);
 
     // Notify teammate
-    MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-    printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    if(teammate_rank >= 0 && teammate_rank < world_size){
+      MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
+      printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
+    }
   }
   // Now process 0 can receive from the last process. This makes sure that at
   // least one MPI_Send is initialized before all MPI_Recvs (again, to prevent
@@ -65,7 +63,6 @@ int main(int argc, char** argv) {
       printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
     }
   }
-
 
   MPI_Finalize();
 }
