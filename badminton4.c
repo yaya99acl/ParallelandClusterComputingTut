@@ -49,8 +49,6 @@ int main(int argc, char** argv) {
         MPI_Send(&ping_pong_count, 1, MPI_INT, partner_rank, 0, MPI_COMM_WORLD);
         printf("Player %d notified by Player %d\n", world_rank, teammate_rank);
     }
-}
-
   }
 
   MPI_Finalize();
