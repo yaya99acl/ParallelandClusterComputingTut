@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
     }
 
-    // 同步点，确保0号进程完成发送
+    // 同步点
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (world_rank != 0) {
@@ -36,15 +36,6 @@ int main(int argc, char** argv) {
         // 通知队友
         MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
         printf("Process %d notified teammate %d\n", world_rank, teammate_rank);
-    }
-
-    // 所有进程完成接收和通知后的同步点
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    if (world_rank != 0) {
-        // 发送token给下一个进程前再次通知队友
-        MPI_Send(&token, 1, MPI_INT, teammate_rank, 0, MPI_COMM_WORLD);
-        printf("Process %d notified teammate %d with token %d before sending\n", world_rank, teammate_rank, token);
         // 发送token给下一个进程
         if (world_rank < world_size - 1) {
             MPI_Send(&token, 1, MPI_INT, world_rank + 1, 0, MPI_COMM_WORLD);
