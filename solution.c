@@ -134,33 +134,29 @@ int main(int argc, char* argv[]) {
 		cost_per_menu_item[item] += price * qty;
 	}
 
-
-    // 7. Customized tree-based reduction to gather all partial sums at the root process
-    int distance = 1;
-    while (distance < size) {
-        if (rank < distance) {
-            int target = rank + distance;
-            if (target < size) {
-                MPI_Send(cost_per_menu_item, ITEMS_ON_MENU, MPI_LONG, target, 0, MPI_COMM_WORLD);
-            }
-        } else if (rank < 2 * distance && rank >= distance) {
-            int source = rank - distance;
-            long buffer[ITEMS_ON_MENU];
-            MPI_Recv(buffer, ITEMS_ON_MENU, MPI_LONG, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// 7. Get all the partial sums and place them on the root node.
+	for (int step = 1; step < size; step *= 2) {
+    if (rank % (2 * step) == 0) {
+        if (rank + step < size) {
+            long received[ITEMS_ON_MENU];
+            MPI_Recv(received, ITEMS_ON_MENU, MPI_LONG, rank + step, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i = 0; i < ITEMS_ON_MENU; i++) {
-                cost_per_menu_item[i] += buffer[i];
+                cost_per_menu_item[i] += received[i];
             }
         }
-        distance *= 2;
-        MPI_Barrier(MPI_COMM_WORLD);
+    } else {
+        MPI_Send(cost_per_menu_item, ITEMS_ON_MENU, MPI_LONG, rank - step, 0, MPI_COMM_WORLD);
+        break; // Exit the loop once sent
     }
+}
 
+	// NOTE: You can leave the remainder of this file unchanged:
 
 	// 8. Calculate the grand total on the root node!
 	if (rank == ROOT_PROCESS) {
 		long grand_total = 0;
 		for (int i = 0; i < ITEMS_ON_MENU; i++) {
-			long cost = cost_per_menu_item[i];
+			long cost = total_cost_per_menu_item[i];
 			grand_total += cost;
 		}
 		printf(
