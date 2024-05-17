@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
 	if (rank == ROOT_PROCESS) {
 		long grand_total = 0;
 		for (int i = 0; i < ITEMS_ON_MENU; i++) {
-			long cost = total_cost_per_menu_item[i];
+			long cost = cost_per_menu_item[i];
 			grand_total += cost;
 		}
 		printf(
